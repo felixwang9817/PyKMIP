@@ -93,7 +93,7 @@ class AttributeValueFactory(object):
         elif name is enums.AttributeType.FRESH:
             return primitives.Boolean(value, enums.Tags.FRESH)
         elif name is enums.AttributeType.LINK:
-            raise NotImplementedError()
+            return self._create_link(value)
         elif name is enums.AttributeType.APPLICATION_SPECIFIC_INFORMATION:
             return self._create_application_specific_information(value)
         elif name is enums.AttributeType.CONTACT_INFORMATION:
@@ -125,6 +125,22 @@ class AttributeValueFactory(object):
                                  '{0}'.format(name))
         else:
             return attributes.Name()
+
+    def _create_link(self, link):
+        if link is not None:
+            if isinstance(link, attributes.Link):
+                return attributes.Link.create(link.linked_object_identifier, link.link_type)
+
+            elif isinstance(link, str):
+                return attributes.Link.create(
+                            link,
+                            enums.LinkType.NEXT_LINK
+                        )
+            else:
+                raise ValueError('Unrecognized attribute type: '
+                                 '{0}'.format(link))
+        else:
+            return attributes.Link()
 
     def _create_cryptographic_length(self, length):
         if length is not None and not isinstance(length, int):
