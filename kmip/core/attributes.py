@@ -1090,7 +1090,7 @@ class Link(Struct):
 
     def __validate(self):
         link = Link.__name__
-        msg = exceptions.ErrorStrings.BAD_EXP_RECV
+        msg = ErrorStrings.BAD_EXP_RECV
         if self.linked_object_identifier and \
                 not isinstance(self.linked_object_identifier, Link.LinkedObjectIdentifier) and \
                 not isinstance(self.linked_object_identifier, str):
@@ -1117,7 +1117,7 @@ class Link(Struct):
             value = cls.LinkedObjectIdentifier(linked_object_identifier)
         else:
             link = 'Link'
-            msg = exceptions.ErrorStrings.BAD_EXP_RECV
+            msg = ErrorStrings.BAD_EXP_RECV
             member = 'linked_object_identifier'
             raise TypeError(msg.format('{0}.{1}'.format(link, member),
                                        'linked_object_identifier', type(Link.LinkedObjectIdentifier),
