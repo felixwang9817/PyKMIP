@@ -406,10 +406,26 @@ class TestAttributeValueFactory(testtools.TestCase):
         """
         Test that a Link attribute can be created.
         """
-        kwargs = {'name': enums.AttributeType.LINK,
-                  'value': None}
-        self.assertRaises(
-            NotImplementedError, self.factory.create_attribute_value, **kwargs)
+        link = self.factory.create_attribute_value(
+            enums.AttributeType.LINK,
+            "12")
+
+        link_empty = self.factory.create_attribute_value(
+            enums.AttributeType.LINK,
+            None)
+
+        self.assertIsInstance(link, attributes.Link)
+        self.assertIsInstance(link.link_type, attributes.Link.LinkType)
+        self.assertIsInstance(link.linked_object_identifier, attributes.Link.LinkedObjectIdentifier)
+        self.assertEqual(
+            link.link_type,
+            attributes.Link.LinkType(enums.LinkType.NEXT_LINK))
+        self.assertEqual(link.linked_object_identifier, attributes.Link.LinkedObjectIdentifier("12"))
+        self.assertNotEqual(
+            link.link_type,
+            attributes.Link.LinkType(enums.LinkType.PRIVATE_KEY_LINK))
+
+        self.assertIsInstance(link_empty, attributes.Link)
 
     def test_create_application_specific_information(self):
         """

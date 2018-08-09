@@ -22,12 +22,14 @@ from kmip.core.attributes import CryptographicParameters
 from kmip.core.attributes import DerivationParameters
 from kmip.core.attributes import DigestValue
 from kmip.core.attributes import HashingAlgorithm
+from kmip.core.attributes import Link
 from kmip.core.attributes import Name
 from kmip.core.attributes import OperationPolicyName
 
 from kmip.core import enums
 from kmip.core.enums import HashingAlgorithm as HashingAlgorithmEnum
 from kmip.core.enums import NameType
+from kmip.core.enums import LinkType
 
 from kmip.core.utils import BytearrayStream
 
@@ -376,6 +378,183 @@ class TestDigestValue(TestCase):
         Test that a DigestValue object can be constructed with valid byte data.
         """
         self._test_init(b'\x00\x01\x02\x03')
+
+
+class TestLinkedObjectIdentifier(TestCase):
+
+    def setUp(self):
+        super(TestLinkedObjectIdentifier, self).setUp()
+        self.stream = BytearrayStream()
+        self.stringName1 = 'Jenny'
+        self.stringName2 = 'Johnny'
+
+    def tearDown(self):
+        super(TestLinkedObjectIdentifier, self).tearDown()
+
+    def test_write_no_padding(self):
+        self.skip('Not implemented')
+
+    def test_write_with_padding(self):
+        self.skip('Not implemented')
+
+    def test_read_no_padding(self):
+        self.skip('Not implemented')
+
+    def test_read_with_padding(self):
+        self.skip('Not implemented')
+
+    def test__eq(self):
+        link_val = Link.LinkedObjectIdentifier(self.stringName1)
+        same_link_val = Link.LinkedObjectIdentifier(self.stringName1)
+        other_link_val = Link.LinkedObjectIdentifier(self.stringName2)
+
+        self.assertTrue(link_val == same_link_val)
+        self.assertFalse(link_val == other_link_val)
+        self.assertFalse(link_val == 'invalid')
+
+    def test__ne(self):
+        link_val = Link.LinkedObjectIdentifier(self.stringName1)
+        other_link_val = Link.LinkedObjectIdentifier(self.stringName2)
+
+        self.assertTrue(link_val != other_link_val)
+        self.assertTrue(link_val != 'invalid')
+
+    def test__str(self):
+        link_val = Link.LinkedObjectIdentifier(self.stringName1)
+        repr_link = "LinkedObjectIdentifier(value='{0}')".format(self.stringName1)
+
+        self.assertEqual(self.stringName1, str(link_val))
+        self.assertEqual(repr_link, repr(link_val))
+
+
+class TestLinkType(TestCase):
+
+    def setUp(self):
+        super(TestLinkType, self).setUp()
+        self.stream = BytearrayStream()
+        self.enum_next_link = LinkType.NEXT_LINK
+
+    def tearDown(self):
+        super(TestLinkType, self).tearDown()
+
+    def test_write_no_padding(self):
+        self.skip('Not implemented')
+
+    def test_write_with_padding(self):
+        self.skip('Not implemented')
+
+    def test_read_no_padding(self):
+        self.skip('Not implemented')
+
+    def test_read_with_padding(self):
+        self.skip('Not implemented')
+
+    def test__eq(self):
+        type_next_link = Link.LinkType(self.enum_next_link)
+        same_type = Link.LinkType(self.enum_next_link)
+
+        self.assertTrue(type_next_link == same_type)
+        self.assertFalse(type_next_link == 'invalid')
+
+    def test__ne(self):
+        type_next_link = Link.LinkType(self.enum_next_link)
+        same_type = Link.LinkType(self.enum_next_link)
+
+        self.assertFalse(type_next_link != same_type)
+        self.assertTrue(type_next_link != 'invalid')
+
+    def test__str(self):
+        type_next_link = Link.LinkType(self.enum_next_link)
+        str_next_link = "{0}".format(self.enum_next_link)
+        repr_next_link = "LinkType(value=<{0}: {1}>)".format(
+                self.enum_next_link,
+                self.enum_next_link.value)
+
+        self.assertEqual(str_next_link, str(type_next_link))
+        self.assertEqual(repr_next_link, repr(type_next_link))
+
+
+class TestLink(TestCase):
+
+    def setUp(self):
+        super(TestLink, self).setUp()
+        self.stream = BytearrayStream()
+        self.badFormatName = 8675309
+        self.stringName1 = 'Jenny'
+        self.stringName2 = 'Johnny'
+        self.enumLinkType = LinkType.NEXT_LINK
+
+    def tearDown(self):
+        super(TestLink, self).tearDown()
+
+    def test_bad_link_value_format(self):
+        """
+         Test that an error is raised in for an incorrectly formatted link
+         value
+        """
+        link_obj = Link()
+        link_obj.linked_object_identifier = self.badFormatName
+        link_obj.link_type = self.enumLinkType
+
+        self.assertRaises(TypeError, link_obj.validate)
+
+    def test_bad_link_type_format(self):
+        """
+         Test that an error is raised for an incorrectly formatted link type
+        """
+        link_obj = Link()
+        link_obj.link_value = self.stringName1
+        link_obj.link_type = self.badFormatName
+
+        self.assertRaises(TypeError, link_obj.validate)
+
+    def test_link_create_string_input(self):
+        """
+         Test the creation of object links with an enum value for the link type
+        """
+        link_obj = Link.create(self.stringName1, self.enumLinkType)
+        self.assertIsInstance(link_obj.linked_object_identifier, Link.LinkedObjectIdentifier)
+        self.assertEqual(self.stringName1, link_obj.linked_object_identifier.value)
+
+    def test_link_create_bad_input(self):
+        """
+         Test the creation of object links with a bad value input
+        """
+        linked_object_identifier = self.badFormatName
+        link_type = self.enumLinkType
+
+        self.assertRaises(TypeError, Link.create, *(linked_object_identifier, link_type))
+
+    def test_link_create_bad_type_input(self):
+        """
+         Test the creation of object links with a bad value input
+        """
+        self.assertRaises(TypeError, Link.create, *(self.stringName1,
+                                                    self.badFormatName))
+
+    def test__eq(self):
+        link_obj = Link.create(self.stringName1, self.enumLinkType)
+        same_link = Link.create(self.stringName1, self.enumLinkType)
+
+        self.assertTrue(link_obj == same_link)
+        self.assertFalse(link_obj == 'invalid')
+
+    def test__ne(self):
+        link_obj = Link.create(self.stringName1, self.enumLinkType)
+        same_link = Link.create(self.stringName1, self.enumLinkType)
+
+        self.assertFalse(link_obj != same_link)
+
+    def test__str(self):
+        link_obj = Link.create(self.stringName1, self.enumLinkType)
+        repr_link = (
+                "Link(type=LinkType(value="
+                "<LinkType.NEXT_LINK: {0}>),"
+                "value=LinkedObjectIdentifier(value='{1}'))"
+                ).format(self.enumLinkType.value, self.stringName1)
+
+        self.assertEqual(self.stringName1, str(link_obj))
+        self.assertEqual(repr_link, repr(link_obj))
 
 
 class TestApplicationNamespace(TestCase):
